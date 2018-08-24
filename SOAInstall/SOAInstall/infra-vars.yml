@@ -1,0 +1,112 @@
+root_directory:                  "/u01"
+# Base directory
+base_directory:                  "{{ root_directory }}/app/oracle"
+ 
+# Directory that will used for the installaton and configuration
+runtime_home:                    "{{ base_directory }}/soa"
+ 
+# Directory where the JVM will be installed (this is dependent on the used tar)
+java_install_dir:                "{{ runtime_home }}/jdk1.8.0"
+# Java Home will be used to rename java_install_dir
+java_home:                       "{{ runtime_home }}/jdk1.8.0_181"
+# Default temporary-file directory that will be specified by the system property java.io.tmpdir
+java_temp_dir:                    "/tmp"
+
+java:                       "{{ java_home }}/bin/java"
+java_security:              "{{ java_home }}/jre/lib/security/java.security" 
+# Directory that will be used as the middleware home (holds software binaries)
+middleware_home:                 "{{ runtime_home }}/installation"
+    
+# Location of the Oracle inventory
+oracle_inventory_home:           "{{ base_directory }}/oraInventory"
+# Scripts directory
+scripts_directory:               "{{ root_directory }}/app/scripts"
+wls_silent_install_file:        "{{ middleware_home }}/silent-weblogic.txt"
+ora_inst_loc:        		"{{ middleware_home }}/oraInst.loc"
+fmw_silent_install_file:        "{{ middleware_home }}/silent_soa.txt"
+#rcu_silent_install_file:        "{{ middleware_home }}"
+#rcu_password_file:              "{{ middleware_home }}"
+
+# Name of the domain
+domain_name:                     "soa_domain"
+ 
+# Directory where the log files will be placed, for example, "{{ runtime_home }}/logs"
+# The default is ${DOMAIN_HOME}/servers/${SERVER_NAME}/logs which is fine
+# To use the default leave logs_home empty, i.e., ""
+logs_home:                       ""
+ 
+# Directory where the configuration will be placed
+configuration_home:              "{{ runtime_home }}/configuration"
+ 
+# Domain home (directory that contains the domain configuration files)
+domain_configuration_home:       "{{ configuration_home }}/domains/{{ domain_name }}"
+ 
+# Domain application home (directory in which application related artifacts are placed)
+domain_application_home:         "{{ configuration_home }}/applications/{{ domain_name }}"
+ 
+# Node manager home (directory that contains the node manager configuration files)
+node_manager_home:               "{{ configuration_home }}/nodemanagers/{{ domain_name }}"
+nodemanager_username: 'weblogic'
+weblogic_admin: 'weblogic'
+admin_server_name: 'AdminServer'
+server_hostname: '{{ ansible_fqdn }}'
+
+
+ 
+# Default homes that are created when the software is installed
+coherence_home:                  "{{ middleware_home }}/coherence"
+fusion_middleware_home:          "{{ middleware_home }}/fmw/soa"
+weblogic_home:                   "{{ middleware_home }}/weblogic12.1.3/wlserver"
+ 
+# Directory where the software to be installed is located
+software_directory:              "/u01/app/oracle"
+    
+# Name of JVM file that is used in the installation
+jvm_file_name:                   "jdk-8u181-linux-x64.tar.gz"
+    
+# Name of the WebLogic file that is used in the installation
+weblogic_file_name:              "fmw_12.2.1.3.0_infrastructure.jar"
+ 
+# Name of the FMW file that is used in the installation
+fmw_file_name:                   "fmw_12.2.1.3.0_soa_quickstart.jar"
+
+ 
+# The scripts create files that are placed in this directory
+temporary_directory:             "{{ software_directory }}/soa_files"
+ 
+# shared directory for the templates that is used by pack and unpack
+templates_directory:             "{{ temporary_directory }}/templates"
+    
+# WebLogic and JVM installer locations
+jvm_installer:                   "{{ software_directory }}/{{ jvm_file_name }}"
+weblogic_installer:              "{{ software_directory }}/{{ weblogic_file_name }}"
+fmw_installer:                   "{{ software_directory }}/soa_soaftwares/{{ fmw_file_name }}"
+rcu_silent_install_file:         "{{ middleware_home }}"
+rcu_password_file:               "{{ middleware_home }}"
+ 
+# User and Group under which the software needs to be installed
+oracle_install_user:             "oracle"
+oracle_install_password:         "oiinstall"
+oracle_install_group:            "oinstall"
+oracle_install_group_id:         "1000"
+
+pack_sh:                    "{{ weblogic_home }}/common/bin/pack.sh"
+unpack_sh:                  "{{ weblogic_home }}/common/bin/unpack.sh"
+wlst_sh:                    "{{ weblogic_home }}/common/bin/wlst.sh"
+fmw_wlst_sh:                "{{ weblogic_home }}/common/bin/wlst.sh"
+
+
+# database settings for repository
+dbserver_name: 'localhost'
+dbserver_port: '1521'
+dbserver_service: 'XE'
+repository_prefix: 'DEV'
+soa_repo_preffix: '{{ repository_prefix }}'
+
+# Nodemanager and server settings
+node_manager_listen_port: '5556'
+node_manager_listen_address: 'localhost'
+admin_server_hostname: 'localhost'
+admin_server_port: '7001'
+managed_server_name: 'soa_server1'
+managed_server_port: '8001'

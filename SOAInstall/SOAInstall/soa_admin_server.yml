@@ -1,0 +1,15 @@
+- name: Configure Oracle Linux 7.1 with WebLogic 12c R2 domain
+  hosts: localhost
+  user: oracle
+  sudo: True
+  vars_files:
+    # User defined variables for infrastructure
+    - infra-vars.yml
+    - secrets.yml
+  roles:
+    - fmw_install
+  pre_tasks:
+    # ==> Fix hosts file. Remove hostname from local loop. A workaround for
+    # remove hostname to local loop
+    - name: fix host file 127.0.0.1 entry
+      lineinfile: dest=/etc/hosts regexp='^127\.0\.0\.1' line='127.0.0.1 localhost localhost.localdomain localhost4 localhost4.localdomain4' owner=root group=root mode=0644

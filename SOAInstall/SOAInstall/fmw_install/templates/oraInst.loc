@@ -1,0 +1,2 @@
+inventory_loc={{ oracle_inventory_home }}
+inst_group={{ oracle_install_group }}

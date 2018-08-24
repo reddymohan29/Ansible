@@ -1,0 +1,118 @@
+- name: create root directory
+  file:
+    path={{ root_directory }}
+    state=directory
+    owner="{{ oracle_install_user }}"
+    group="{{ oracle_install_group }}"
+    mode=0755
+    
+- name: create directories
+  file:
+    path="{{ item }}"
+    state=directory
+    owner="{{ oracle_install_user }}"
+    group="{{ oracle_install_group }}"
+    mode=0755
+  when: not( ("{{ item }}" is undefined) or ("{{ item }}" is none) or ("{{ item }}" | trim=='') )
+  with_items:
+    #- "{{ scripts_directory }}"
+    - "{{ temporary_directory }}"
+    - "{{ templates_directory }}"
+    #- "{{ logs_home }}"
+    #- "{{ file_store_directory }}"
+    #- "{{ weblogic_extension_directory }}"
+    
+- name: create weblogic silent install file
+  template:
+    src=silent_weblogic.txt
+    dest="{{ wls_silent_install_file }}"
+    #owner="{{ oracle_install_user }}"
+    #group="{{ oracle_install_group }}"
+    #mode=0644
+  register: weblogic_silent_install_file_created
+  
+- name: create oraInst.loc
+  template:
+    src=oraInst.loc
+    dest="{{ ora_inst_loc }}"
+    #owner="{{ oracle_install_user }}"
+    #group="{{ oracle_install_group }}"
+    #mode=0644
+  register: orainst_loc_created
+
+- name: create soa suite silent install file
+  template:
+    src=silent_soa.txt 
+    dest="{{ fmw_silent_install_file }}"
+    owner="{{ oracle_install_user }}"
+    group="{{ oracle_install_group }}"
+    mode=0644
+  register: fmw_silent_install_file_created
+
+- name: install java virtual machine
+  unarchive:
+    copy=no
+    creates="{{ java }}"
+    src="{{ jvm_installer }}"
+    dest="{{ runtime_home }}"
+    owner="{{ oracle_install_user }}"
+    group="{{ oracle_install_group }}"
+  register: jvm_installed
+ 
+- name: rename java virtual machine directory
+  become: true
+  become_user: "{{ oracle_install_user }}"
+  become_method: su
+  command: /bin/sh -c "/usr/bin/mv {{java_install_dir}} {{java_home}}"
+    creates="{{ java_home }}"
+  register: jvm_directory_renamed
+  when: jvm_installed|success
+  
+#- name: install weblogic server
+ # become: true
+ # become_user: "{{ oracle_install_user }}"
+ # become_method: su
+ # command: /bin/sh -c "{{ java }} -Xms768m -Xmx768m -Djava.io.tmpdir={{ java_temp_dir }} -jar {{ weblogic_installer }} -silent -responseFile {{ wls_silent_install_file }} -invPtrLoc {{ ora_inst_loc }}"
+  #  creates="{{ wlst_sh }}"
+  #register: weblogic_installed
+  #when: jvm_installed|success and weblogic_silent_install_file_created|success and orainst_loc_created|success
+  
+#- name: install fmw component
+ # become: true
+ # become_user: "{{ oracle_install_user }}"
+ # become_method: su
+  #command: /bin/sh -c "{{ java }} -Xms1024m -Xmx1024m -Djava.io.tmpdir={{ java_temp_dir }} -jar {{ fmw_installer }} -silent -responseFile {{ fmw_silent_install_file }} -invPtrLoc {{ ora_inst_loc }}"
+   # creates="{{ fmw_wlst_sh }}"
+  #register: fmw_silent_install_file_created
+  #when: weblogic_installed|success and fmw_silent_install_file_created|success and orainst_loc_created|success
+#- name: install RCU
+ # become: true
+ # become_user: "{{ oracle_install_user }}"
+ # become_method: su
+  #command: /bin/sh -c "/u01/app/oracle/soa/installation/weblogic12.1.3/oracle_common/bin/rcu -silent -createRepository -databaseType ORACLE -connectString bala1.sub07301556380.vcn0730155638.oraclevcn.com:1521:XE -dbUser sys -dbRole SYSDBA -schemaPrefix DEV1 -useSamePasswordForAllSchemaUsers true -component IAU -component IAU_APPEND -component IAU_VIEWER -component OPSS -component STB -component MDS -component UCSUMS -component SOAINFRA  -f < /u01/app/oracle/soa/passwords.txt"
+  #register: RCU_installed
+  #ignore_errors: yes
+- name: check if domain folder exists
+  stat: path={{ domain_configuration_home }}
+  register: domain_exists
+
+- name: copy domain.properties
+  template: src=domain.properties dest={{ middleware_home }} owner={{ oracle_install_user }} group={{ oracle_install_group }}
+
+- name: copy create domain python script
+  template: src=create-domain.py dest={{ middleware_home }} owner={{ oracle_install_user }} group={{ oracle_install_group }}
+  tags:
+    - create-domain
+- name: Execute create domain script
+  shell: "{{ fusion_middleware_home }}/oracle_common/common/bin/wlst.sh {{ middleware_home }}/create-domain.py"
+  when: domain_exists.stat.exists == False
+  tags:
+    - create-domain
+
+# ==> Create Environment Variables for Oracle user
+#- name: Creates new .bashrc file with system variables
+#  template: src=.bashrc dest=/home/oracle/.bashrc
+#- name: Add Oracle Home environment variables
+#  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export ORACLE_HOME={{ middleware_home }}'
+#  tags:
+#    - oracle-vars
