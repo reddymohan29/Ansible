@@ -1,0 +1,72 @@
+################################################################################
+# ==> Main Tasks for soa-domain Role
+# ==> Creates a Domain with Fussion Middleware 12c R2 Infrastructure software
+# ==> Compatible with 12.2.1
+# ==> author: Christos Vezalis
+################################################################################
+
+# ==> Create new domain
+- name: check if domain folder exists
+  stat: path={{ domain_home }}
+  register: domain_exists
+
+- name: copy weblogic Tool
+  unarchive:
+    src: "{{ software_library }}/weblogic-deploy.zip"
+    dest: "{{ mw_installer_folder }}/"
+
+- name: copy create domain python script
+  template: src=SOA.json dest={{ mw_installer_folder }}/weblogic-deploy/lib/typedefs/ owner={{ oracle_user }} group={{ oracle_group }}
+  tags:
+    - create-domain
+- name: copy create domain python script
+  template: src=soa-model.yml dest={{ mw_installer_folder }} owner={{ oracle_user }} group={{ oracle_group }}
+  tags:
+    - create-domain
+
+- name: copy create domain python script
+  template: src=passwords.txt dest={{ mw_installer_folder }} owner={{ oracle_user }} group={{ oracle_group }}
+  tags:
+    - create-domain
+
+- name: Execute create domain script
+  shell: "{{ mw_installer_folder }}/weblogic-deploy/bin/createDomain.sh -oracle_home {{ middleware_home }} -domain_type SOA -domain_parent {{ domains_home }} -model_file {{ mw_installer_folder }}/soa-model.yml -rcu_db {{dbserver_name}}:{{dbserver_port }}/{{ dbserver_service }} -rcu_prefix {{repository_prefix}} -run_rcu -rcu_sys_pass {{ sysdba_passwd }} -rcu_schema_pass {{ datasource_password }}"
+  environment:
+    JAVA_HOME: "{{ jdk_folder }}"
+
+#- name: Execute Domain Pack
+#  command: /bin/sh -c "{{ middleware_home }}/oracle_common/common/bin/pack.sh -domain={{ domain_home }} -template={{mw_installer_folder}}/soa_domain.jar -template_name=remote_managed -managed=true"
+#  tags:
+#   - create-domain
+   
+#- name: Copy soadomain file on the remote machine
+#  copy:
+#    src: "{{mw_installer_folder}}/soa_domain.jar"
+#    dest: "{{mw_installer_folder}}"
+#    remote_src: yes
+
+#- name: check if the weblogic template is present
+#  command: /usr/bin/test -f {{ wls_template_file }}
+#  register: weblogic_template_present
+#  ignore_errors: True
+  
+#- debug:
+#    var=weblogic_template_present
+    
+#- name: create domain
+#  shell: /bin/su -c "{{ fmw_home }}/oracle_common/common/bin/pack.sh -domain={{ domain_home }} -app_dir={{ applications_home }}"
+#  when: weblogic_template_present|success
+
+#- name: clean Domain Path
+#  file:
+#   state:absent
+#   path:"{{ mw_installer_folder }}passwords.txt"
+#  tags:
+#    - create-domain
+# ==> Create Environment Variables for Oracle user
+#- name: Creates new .bashrc file with system variables
+#  template: src=.bashrc dest=/home/oracle/.bashrc
+- name: Add Oracle Home environment variables
+  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export ORACLE_HOME={{ middleware_home }}'
+  tags:
+    - oracle-vars

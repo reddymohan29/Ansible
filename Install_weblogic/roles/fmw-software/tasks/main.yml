@@ -1,0 +1,26 @@
+################################################################################
+# ==> Tasks for install Oracle Fussion Middleware Infrastructure software 12c R2
+# ==> to an Oracle Linux 7.1 system. Supports version 12.2.1
+
+################################################################################
+
+# ==> Install Fussion Middleware Infrastructure Software
+- name: Check if Weblogic Infra is already intalled
+  stat: path='{{ middleware_home }}'
+  register: fmw_installation_exists
+
+- name: Create installer directory
+  file: state=directory path={{ mw_installer_folder }}
+- name: Copy Middleware Installer
+  copy: src={{ software_library }}/{{ mw_installer }} dest={{ mw_installer_folder }}
+  when: fmw_installation_exists.stat.exists == False
+- name: Copy file for silent installation
+  template: src=silent-weblogic.txt dest={{ mw_installer_folder }}
+- name: Copy OraInst.loc
+  template: src=oraInst.loc dest={{ mw_installer_folder }}
+
+
+
+- name: execute Weblogic installer
+  command: "{{ jdk_folder }}/bin/java -Xms1024m -Xmx1024m -jar {{ mw_installer_folder }}/{{ mw_installer }} -silent -responseFile {{ mw_installer_folder }}/silent-weblogic.txt -invPtrLoc {{ mw_installer_folder }}/oraInst.loc"
+  when: fmw_installation_exists.stat.exists == False
