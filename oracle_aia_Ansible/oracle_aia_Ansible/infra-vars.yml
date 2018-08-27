@@ -1,0 +1,53 @@
+# Oracle os user and group
+oracle_user: 'oracle'
+oracle_group: 'oinstall'
+# Software and configuration main directory
+oracle_base: '/u01/app/oracle/soa'
+root_directory: 'u01/'
+# JDK installer and target folder
+jdk_installation_archive: 'jdk-8u181-linux-x64.tar.gz'
+jdk_folder: '{{ oracle_base }}/jdk1.8.0_181'
+
+# fmw installer
+mw_installer: 'fmw_12.2.1.3.0_infrastructure.jar'
+soa_installer: 'fmw_12.2.1.3.0_soa.jar'
+software_library: '/u01/app/oracle/soa_soaftwares'
+aiafp_installer: 'comms_home_installer_generic.jar'
+aiafp: aiapip.zip
+aia_home: '/u01/app/oracle/soa/AIA'
+# database settings for repository
+dbserver_name: 'bala1.sub07301556380.vcn0730155638.oraclevcn.com'
+dbserver_port: '1524'
+dbserver_service: 'DB.ORADB.PRIVATE'
+repository_prefix: 'DEV'
+soa_repo_preffix: '{{ repository_prefix }}'
+soa_install_type: 'SOA Suite'
+# Domain Name
+domain_name: 'soa_domain'
+
+# Nodemanager and server settings
+node_manager_listen_port: '5556'
+node_manager_listen_address: '10.0.0.5'
+node_manager_username: 'weblogic'
+node_manager_password: 'welcome1'
+admin_server_hostname: '10.0.0.5'
+admin_server_port: '7001'
+admin_server_ssl_port: '7002'
+managed_server_name: '10.0.0.5'
+managed_server_port: '7003'
+managed_server_ssl_port: '7005'
+managed_server_name2: 'localhost'
+managed_server_port2: '7010'
+managed_server_ssl_port2: '7015'
+
+
+#Server Names and Machine Names
+adminserver: 'AdminServer'
+managedserver1: 'soa_server1'
+managedserver2: 'soa_server2'
+#Machines
+machine1: 'SOA_Machine1'
+machine2: 'SOA_Machine2'
+#ClusterName
+Cluster1: 'SOA_Cluster'
+Cluser2: 'SOA_Cluster'

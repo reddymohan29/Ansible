@@ -1,0 +1,58 @@
+domainInfo:
+    AdminUserName: '{{ weblogic_admin }}'
+    AdminPassword: '{{ weblogic_domain_pass }}'
+    ServerStartMode: prod
+    ServerGroupTargetingLimits:
+        'WSMPM-MAN-SVR': soa_cluster
+        'SOA-MGD-SVRS': 'soa_server1'
+topology:
+    Name: '{{ domain_name }}'
+    AdminServerName: AdminServer
+    Cluster:
+        soa_cluster:
+       
+    Server:
+        AdminServer:
+            ListenAddress: '{{admin_server_hostname }}'
+            ListenPort: '{{admin_server_port }}'
+            Machine: machine1
+            SSL:
+                Enabled: false
+                ListenPort: '{{admin_server_ssl_port }}'
+        soa_server1:
+            ListenAddress: '{{managed_server_name }}'
+            ListenPort: '{{managed_server_port }}'
+            Cluster: soa_cluster
+            Machine: machine1
+            SSL:
+                Enabled: false
+                ListenPort: '{{managed_server_ssl_port }}'
+        
+    UnixMachine:
+        machine1:
+            NodeManager:
+                ListenAddress: '{{ node_manager_listen_address }}'
+                ListenPort: '{{ node_manager_listen_port }}'
+    SecurityConfiguration:
+        NodeManagerUsername: '{{ node_manager_username }}'
+        NodeManagerPasswordEncrypted: '{{ node_manager_password }}'
+resources:
+    JDBCSystemResource:
+        Generic1:
+            Target: soa_cluster
+            JdbcResource:
+                JDBCDataSourceParams:
+                    JNDIName: jdbc/generic1
+                JDBCDriverParams:
+                    DriverName: oracle.jdbc.OracleDriver
+                    URL: 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=bala1.sub07301556380.vcn0730155638.oraclevcn.com)(PORT=1524)))(CONNECT_DATA=(SERVICE_NAME=DB.ORADB.PRIVATE)))'
+                    PasswordEncrypted: 'welcome1'
+                    Properties:
+                        user:
+                            Value: 'test'
+                        oracle.net.CONNECT_TIMEOUT:
+                            Value: 5000
+                JDBCConnectionPoolParams:
+                    MaxCapacity: 50
+appDeployments:
+    Application:

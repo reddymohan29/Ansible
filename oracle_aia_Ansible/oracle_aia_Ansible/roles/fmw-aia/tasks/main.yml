@@ -1,0 +1,41 @@
+################################################################################
+# ==> Main Tasks for soa-domain Role
+# ==> Creates a Domain with Fussion Middleware 12c R2 Infrastructure software
+################################################################################
+
+# ==> Create new domain
+- name: Check if Weblogic Infra is already intalled
+  stat: path='{{ aia_home }}'
+  register: aia_home_exists
+
+- name: copy AIAFP Libraries
+  copy:
+    src: "{{ software_library }}/{{aiafp_installer}}"
+    dest: "{{ mw_installer_folder }}/"
+  tags:
+    - install-aiafp
+
+- name: copy aiafp response file
+  template: src=FPAIA.rsp dest={{ mw_installer_folder }}
+  tags:
+    - install-aiafp
+
+- name: install aiafp component
+  become_user: "{{ oracle_user }}"
+  command: /bin/sh -c "{{ jdk_folder }}/bin/java -Xms1024m -Xmx1024m -jar {{ mw_installer_folder }}/comms_home_installer_generic.jar -silent -responseFile {{ mw_installer_folder }}/FPAIA.rsp -invPtrLoc {{ mw_installer_folder }}/oraInst.loc"
+  when: aia_home_exists.stat.exists == False
+  tags:
+    - install-aiafp
+
+- name: copy domain configuration file for AIA Installation
+  become_user: "{{ oracle_user }}"
+  command: "{{ aia_home }}/comms_home/src/SCEApp/SCEApp.sh {{ middleware_home }}"
+
+- name: Copy Update Domain files
+  template: src=update-domain.py dest={{ mw_installer_folder }} owner= {{ oracle_user }} group= {{ oracle_group }} mode=755
+  tags:
+    - install-aiafp
+
+- name: Update domain configuration for AIA
+  become_user: "{{ oracle_user }}"
+  shell: "{{ middleware_home }}/oracle_common/common/bin/wlst.sh {{ mw_installer_folder }}/update-domain.py"

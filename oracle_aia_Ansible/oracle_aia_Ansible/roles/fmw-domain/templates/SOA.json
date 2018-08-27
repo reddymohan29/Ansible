@@ -1,0 +1,17 @@
+{
+    "name": "SOA",
+    "description": "SOA type domain definitions",
+    "versions": {
+        "12.2.1.3": "SOA_12213"
+    },
+    "definitions": {
+        "SOA_12213": {
+            "baseTemplate": "Basic WebLogic Server Domain",
+            "extensionTemplates": [
+                "Oracle SOA Suite"
+            ],
+            "serverGroupsToTarget": [ "JRF-MAN-SVR", "WSMPM-MAN-SVR",  "SOA-MGD-SVRS" ],
+            "rcuSchemas": [ "STB", "WLS", "MDS", "IAU", "IAU_VIEWER", "IAU_APPEND", "OPSS", "UCSUMS", "SOAINFRA" ]
+        }
+    }
+}

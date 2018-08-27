@@ -1,0 +1,36 @@
+################################################################################
+# ==> Main Tasks for soa-domain Role
+# ==> Creates a Domain with Fussion Middleware 12c R2 Infrastructure software
+# ==> Compatible with 12.2.1
+# ==> author: Christos Vezalis
+################################################################################
+
+# ==> Create new domain
+- name: check if domain folder exists
+  stat: path={{ domain_home }}
+  register: domain_exists
+
+- name: copy weblogic Tool
+  unarchive:
+    src: "{{ software_library }}/weblogic-deploy.zip"
+    dest: "{{ mw_installer_folder }}/"
+
+
+- name: copy create domain python script
+  template: src=SOA.json dest={{ mw_installer_folder }}/weblogic-deploy/lib/typedefs/ owner={{ oracle_user }} group={{ oracle_group }}
+  tags:
+    - create-domain
+
+
+- name: Execute create domain script
+  shell: "{{ mw_installer_folder }}/weblogic-deploy/bin/createDomain.sh -oracle_home {{ middleware_home }} -domain_type SOA -domain_parent {{ domains_home }} -model_file {{ mw_installer_folder }}/create-domain.py -rcu_db bala1.sub07301556380.vcn0730155638.oraclevcn.com:1524/DB.ORADB.PRIVATE -rcu_prefix DEV -run_rcu -rcu_sys_pass=oracle -rcu_schema_pass=welcome1"
+  environment:
+    JAVA_HOME: "{{ jdk_folder }}"
+
+# ==> Create Environment Variables for Oracle user
+#- name: Creates new .bashrc file with system variables
+#  template: src=.bashrc dest=/home/oracle/.bashrc
+- name: Add Oracle Home environment variables
+  lineinfile: dest='/home/{{ oracle_user }}/.bashrc' line='export ORACLE_HOME={{ middleware_home }}'
+  tags:
+    - oracle-vars
