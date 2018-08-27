@@ -1,6 +1,6 @@
 ---
 - name: Configure Oracle Linux 7.1 with WebLogic 12c R2 domain
-  hosts: "weblogic"
+  hosts: "localhost"
   sudo: True
   vars_files:
     # User defined variables for infrastructure
@@ -13,12 +13,6 @@
     #- role: linux-wls
     - role: linux-jdk
     - role: fmw-software
-      sudo_user: '{{ oracle_user }}'
-    - role: soa-software
-      sudo_user: '{{ oracle_user }}'
-    #- role: fmw-software
-    #  sudo_user: '{{ oracle_user }}'
-    - role: fmw-aia
       sudo_user: '{{ oracle_user }}'
     - role: fmw-domain
       sudo_user: '{{ oracle_user }}'

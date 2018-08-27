@@ -1,2 +1,0 @@
-{{ sysdba_passwd }}
-{{ datasource_password }}
